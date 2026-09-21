@@ -3,7 +3,7 @@ import tempfile
 import unittest
 from pathlib import Path
 
-from aseprite_pair_witness.cli import main, validate
+from aseprite_pair_witness.cli import audit_directory, main, validate
 
 
 PNG_2X2 = (
@@ -82,6 +82,43 @@ class PairWitnessTests(unittest.TestCase):
         with tempfile.TemporaryDirectory() as raw:
             code = main(["--json", str(Path(raw) / "missing.json")])
             self.assertEqual(code, 2)
+
+    def test_directory_audit_detects_orphan_png(self) -> None:
+        with tempfile.TemporaryDirectory() as raw:
+            directory = Path(raw)
+            (directory / "orphan.png").write_bytes(PNG_2X2)
+            result = audit_directory(directory)
+            self.assertEqual(result["status"], "insufficient")
+            self.assertEqual(result["exit_code"], 2)
+            self.assertEqual(result["reports"][0]["issues"][0]["code"], "json_missing")
+
+    def test_directory_audit_validates_same_stem_pair(self) -> None:
+        with tempfile.TemporaryDirectory() as raw:
+            directory = Path(raw)
+            write_pair(
+                directory,
+                {"frames": {"idle": {"frame": {"x": 0, "y": 0, "w": 2, "h": 2}}}, "meta": {"image": "sheet.png"}},
+            )
+            result = audit_directory(directory)
+            self.assertEqual(result["status"], "pass")
+            self.assertEqual(result["exit_code"], 0)
+
+    def test_directory_audit_detects_orphan_json(self) -> None:
+        with tempfile.TemporaryDirectory() as raw:
+            directory = Path(raw)
+            (directory / "orphan.json").write_text(
+                json.dumps({"frames": {"idle": {"frame": {"x": 0, "y": 0, "w": 1, "h": 1}}}, "meta": {"image": "orphan.png"}}),
+                encoding="utf-8",
+            )
+            result = audit_directory(directory)
+            self.assertEqual(result["status"], "fail")
+            self.assertEqual(result["reports"][0]["issues"][0]["code"], "image_missing")
+
+    def test_cli_directory_mode_returns_directory_report(self) -> None:
+        with tempfile.TemporaryDirectory() as raw:
+            directory = Path(raw)
+            (directory / "orphan.png").write_bytes(PNG_2X2)
+            self.assertEqual(main(["--directory", str(directory)]), 2)
 
 
 if __name__ == "__main__":

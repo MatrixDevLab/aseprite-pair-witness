@@ -27,6 +27,8 @@ replace a game-engine importer.
 
 ```bash
 python3 -m aseprite_pair_witness.cli --json build/player.json --image build/player.png --pretty
+# Audit same-stem PNG/JSON sidecars in a build directory.
+python3 -m aseprite_pair_witness.cli --directory build/assets --pretty
 ```
 
 The report is deterministic JSON with a typed `status`:
@@ -43,7 +45,8 @@ insufficient returns `2`.
 
 The first version has no runtime dependencies. Its tests use a minimal PNG
 fixture and cover hash and array JSON forms, missing images, geometry bounds,
-absolute path warnings, and fail-closed missing metadata.
+absolute path warnings, fail-closed missing metadata, and directory audits
+that detect orphaned PNG or JSON sidecars.
 
 ```bash
 PYTHONPATH=src python3 -m unittest discover -s tests -v
@@ -52,11 +55,9 @@ python3 -m compileall -q src tests
 
 ## Roadmap
 
-1. Add a documented CI-friendly directory mode that detects missing sidecars
-   without requiring a caller to name a JSON file that does not exist.
-2. Add opt-in checks for Aseprite `meta.size`, trimmed/rotated frame semantics,
+1. Add opt-in checks for Aseprite `meta.size`, trimmed/rotated frame semantics,
    and selected slice/tag references.
-3. Stop unless an independent consumer demonstrates a concrete need beyond
+2. Stop unless an independent consumer demonstrates a concrete need beyond
    these portable pair invariants.
 
 ## Stopping point
