@@ -65,3 +65,6 @@ python3 -m compileall -q src tests
 This release stops at static pair admission and loss-risk reporting. It does
 not become a general Aseprite parser, a renderer, an asset packer, or an
 engine-specific import replacement.
+
+The post-v1 consumer review and release boundary are recorded in
+[`docs/consumer-review.md`](docs/consumer-review.md).
