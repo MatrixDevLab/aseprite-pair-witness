@@ -1,0 +1,19 @@
+[build-system]
+requires = ["setuptools>=68"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "aseprite-pair-witness"
+version = "0.1.0"
+description = "Fail-closed preflight for Aseprite sprite-sheet PNG/JSON pair integrity"
+readme = "README.md"
+requires-python = ">=3.9"
+license = {text = "MIT"}
+authors = [{name = "MatrixDevLab"}]
+dependencies = []
+
+[project.scripts]
+aseprite-pair-witness = "aseprite_pair_witness.cli:main"
+
+[tool.setuptools.packages.find]
+where = ["src"]
