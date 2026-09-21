@@ -206,13 +206,78 @@ def validate(json_path: Path, image_override: Path | None = None) -> dict[str, A
     return result
 
 
+def audit_directory(directory: Path) -> dict[str, Any]:
+    """Validate same-stem PNG/JSON pairs and report orphaned sidecars."""
+    directory = directory.expanduser()
+    if not directory.is_dir():
+        issue = _issue("directory_missing", "insufficient", "Asset directory does not exist.", str(directory))
+        return {
+            "tool": "aseprite-pair-witness",
+            "version": __version__,
+            "status": "insufficient",
+            "exit_code": 2,
+            "directory": str(directory),
+            "reports": [],
+            "issues": [issue],
+        }
+
+    json_files = {path.stem: path for path in sorted(directory.glob("*.json"))}
+    image_files = {path.stem: path for path in sorted(directory.glob("*.png"))}
+    stems = sorted(set(json_files) | set(image_files))
+    reports = [
+        validate(
+            json_files.get(stem, directory / f"{stem}.json"),
+            image_files.get(stem, directory / f"{stem}.png"),
+        )
+        for stem in stems
+    ]
+
+    if not reports:
+        issues = [_issue("directory_empty", "insufficient", "No PNG or JSON sidecars were found.", str(directory))]
+        return {
+            "tool": "aseprite-pair-witness",
+            "version": __version__,
+            "status": "insufficient",
+            "exit_code": 2,
+            "directory": str(directory),
+            "reports": [],
+            "issues": issues,
+        }
+
+    statuses = {report["status"] for report in reports}
+    if "fail" in statuses:
+        status, exit_code = "fail", 1
+    elif "insufficient" in statuses:
+        status, exit_code = "insufficient", 2
+    elif "warning" in statuses:
+        status, exit_code = "warning", 1
+    else:
+        status, exit_code = "pass", 0
+    return {
+        "tool": "aseprite-pair-witness",
+        "version": __version__,
+        "status": status,
+        "exit_code": exit_code,
+        "directory": str(directory),
+        "reports": reports,
+        "issues": [],
+    }
+
+
 def main(argv: list[str] | None = None) -> int:
     parser = argparse.ArgumentParser(description=__doc__)
-    parser.add_argument("--json", required=True, type=Path, dest="json_path", help="Aseprite JSON metadata file")
+    sources = parser.add_mutually_exclusive_group(required=True)
+    sources.add_argument("--json", type=Path, dest="json_path", help="Aseprite JSON metadata file")
+    sources.add_argument("--directory", type=Path, help="Directory containing same-stem PNG/JSON sidecars")
     parser.add_argument("--image", type=Path, help="PNG image; otherwise derive it from meta.image")
     parser.add_argument("--pretty", action="store_true", help="Indent the JSON report")
     args = parser.parse_args(argv)
-    result = validate(args.json_path, args.image)
+    if args.directory is not None:
+        if args.image is not None:
+            parser.error("--image can only be used with --json")
+        result = audit_directory(args.directory)
+    else:
+        result = validate(args.json_path, args.image)
     print(json.dumps(result, indent=2 if args.pretty else None, sort_keys=True))
     return int(result["exit_code"])
 
