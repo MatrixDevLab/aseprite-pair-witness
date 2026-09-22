@@ -1,6 +1,6 @@
 # Post-v1 consumer review
 
-Review date: 2026-09-21
+Review date: 2026-09-22
 
 This review checks whether the shipped static pair witness should grow another
 portable invariant or an engine-specific integration.
@@ -31,7 +31,9 @@ portable invariant or an engine-specific integration.
   remains elsewhere, causing Godot validation to fail with a missing resource.
   This is independent evidence that pair/path relationships matter at a
   consumer boundary, but the proposed copy/path flags are Godot-specific and
-  do not justify an engine integration here.
+  do not justify an engine integration here. A 2026-09-22 recheck found no new
+  comments or consumer requirement on this issue; Aseprite #6040 likewise
+  remains open without a new portable invariant.
 
 ## Decision
 
