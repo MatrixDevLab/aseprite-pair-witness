@@ -68,3 +68,5 @@ engine-specific import replacement.
 
 The post-v1 consumer review and release boundary are recorded in
 [`docs/consumer-review.md`](docs/consumer-review.md).
+The validation snapshot and known packaging gap are recorded in
+[`docs/release-readiness.md`](docs/release-readiness.md).
