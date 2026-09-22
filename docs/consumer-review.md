@@ -25,6 +25,13 @@ portable invariant or an engine-specific integration.
   is an engine-integrated `.aseprite` importer rather than a portable PNG/JSON
   sidecar validator. It is useful scope evidence, but not a reason to add a
   Unity-specific mode here.
+- [auto-godot issue #135](https://github.com/Wundrfull/auto-godot/issues/135)
+  reports a concrete downstream failure where an imported Aseprite JSON
+  resource references a sheet PNG at a generated path while the exported PNG
+  remains elsewhere, causing Godot validation to fail with a missing resource.
+  This is independent evidence that pair/path relationships matter at a
+  consumer boundary, but the proposed copy/path flags are Godot-specific and
+  do not justify an engine integration here.
 
 ## Decision
 
