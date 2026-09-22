@@ -7,6 +7,13 @@ portable invariant or an engine-specific integration.
 
 ## Evidence
 
+- [Aseprite issue #6040](https://github.com/aseprite/aseprite/issues/6040)
+  remains open as of 2026-09-22. Its reproduction still describes a PNG
+  export succeeding while the JSON sidecar is absent after switching projects;
+  the only maintainer-side discussion currently visible is a user report that
+  disabling and re-enabling JSON export restored the behavior. This confirms
+  the upstream failure boundary but does not add a new consumer requirement
+  beyond the shipped pair-admission witness.
 - [Phaser's Aseprite loader](https://docs.phaser.io/api-documentation/class/loader-loaderplugin)
   accepts separate texture and atlas URLs and documents an exported PNG/JSON
   pair. This is direct evidence that missing or mismatched sidecars are a
